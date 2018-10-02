@@ -1,0 +1,29 @@
+﻿<Window x:Class="Task_Layout_Manager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Task_Layout_Manager"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
+    <Grid>
+        <DataGrid x:Name="DgvProcessGrid" Margin="10,35,10,10">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Image" Width="auto" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Icon}" Width="16" Height="16" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Binding="{Binding Name}" ClipboardContentBinding="{x:Null}" Header="Name" Width="auto"/>
+                <DataGridTextColumn Binding="{Binding Path}" ClipboardContentBinding="{x:Null}" Header="Path" Width="*"/>
+                <DataGridTextColumn Binding="{Binding Position}" ClipboardContentBinding="{x:Null}" Header="Position (X:Y)" Width="auto"/>
+                <DataGridTextColumn Binding="{Binding Size}" ClipboardContentBinding="{x:Null}" Header="Size(H:W)" Width="auto"/>
+
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button x:Name="BtnRefresh" Content="Refresh Processes" HorizontalAlignment="Left" Margin="671,10,0,0" VerticalAlignment="Top" Width="111" Click="BtnRefresh_Click"/>
+
+    </Grid>
+</Window>
