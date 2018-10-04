@@ -1,24 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using MahApps.Metro.Controls;
 
 namespace Task_Layout_Manager
 {
-    /// <summary>
-    /// Interaktionslogik für MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow
+    public partial class MainWindow : MetroWindow
     {
         public MainWindow()
         {
             InitializeComponent();
+
+            Style rowStyle = new Style(typeof(DataGridRow));
+            
+            rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
+                new MouseButtonEventHandler(Row_DoubleClick)));
+            DgvProcessGrid.RowStyle = rowStyle;
+        }
+
+        private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+            // Some operations with this row
         }
 
         public struct MyCommands
@@ -28,6 +39,7 @@ namespace Task_Layout_Manager
             public string Position { get; set; }
             public string Size { get; set; }
             public ImageSource Icon { get; set; }
+            public string WindowState { get; set; }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -55,17 +67,37 @@ namespace Task_Layout_Manager
                         BitmapSizeOptions.FromEmptyOptions());
                 }
 
+                string windowstate = null;
+
+                switch (tw.ShowCmd)
+                {
+                    case 1:
+                        windowstate = "Normal";
+                        break;
+                    case 2:
+                        windowstate = "Minimized";
+                        break;
+                    case 3:
+                        windowstate = "Maximized";
+                        break;
+                }
+
                 DgvProcessGrid.Items.Add(new MyCommands
                 {
                     Icon = image,
                     Name = tw.Name,
                     Path = tw.Path,
                     Position = tw.PosX + " : " + tw.PosY,
-                    Size = tw.Height + " : " + tw.Width
+                    Size = tw.Height + " : " + tw.Width,
+                    WindowState = windowstate
                 });
             }
+
             DgvProcessGrid.Items.Refresh();
         }
+
+
+
 
         //private void Button_Click(object sender, RoutedEventArgs e)
         //{

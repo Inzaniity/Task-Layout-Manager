@@ -62,7 +62,7 @@ namespace Task_Layout_Manager
         public static List<TaskWindow> GetProcesses()
         {
             TaskWindows.Clear();
-            
+
             Process[] procs = Process.GetProcesses();
             foreach (Process proc in procs)
             {
@@ -75,23 +75,20 @@ namespace Task_Layout_Manager
 
                     //ShowCmd = Windowstate
                     // 1 = Normal, 2 = Minimized, 3 = Maximized
-                    if (placement.ShowCmd == 1 || placement.ShowCmd == 3)
+                    int width = rct.Right - rct.Left + 1;
+                    int height = rct.Bottom - rct.Top + 1;
+
+                    if (width > 1 && height > 1)
                     {
-                        int width = rct.Right - rct.Left + 1;
-                        int height = rct.Bottom - rct.Top + 1;
+                        TaskWindow taskWindow = new TaskWindow(proc.ProcessName, proc.MainModule.FileName,
+                            placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd));
+                        TaskWindows.Add(taskWindow);
 
-                        if (width > 1 && height > 1)
-                        {
-                            TaskWindow taskWindow = new TaskWindow(proc.ProcessName, proc.MainModule.FileName,
-                                placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd));
-                            TaskWindows.Add(taskWindow);
-
-                            //debugging
-                            var s = Screen.FromHandle(hWnd).DeviceName;
-                            //Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
-                            Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
-                            Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
-                        }
+                        //debugging
+                        var s = Screen.FromHandle(hWnd).DeviceName;
+                        //Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
+                        Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
+                        Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
                     }
                 }
             }
