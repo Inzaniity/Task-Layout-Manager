@@ -1,32 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MahApps.Metro.Controls;
+using CheckBox = System.Windows.Controls.CheckBox;
 
 namespace Task_Layout_Manager
 {
     public partial class MainWindow : MetroWindow
     {
+        private List<TaskWindow> _tskwin;
+
         public MainWindow()
         {
             InitializeComponent();
 
             Style rowStyle = new Style(typeof(DataGridRow));
-            
+
             rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
                 new MouseButtonEventHandler(Row_DoubleClick)));
             DgvProcessGrid.RowStyle = rowStyle;
         }
 
-        private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
+        private static void Row_DoubleClick(object sender, MouseButtonEventArgs e)
         {
             DataGridRow row = sender as DataGridRow;
             // Some operations with this row
@@ -34,6 +39,7 @@ namespace Task_Layout_Manager
 
         public struct MyCommands
         {
+            public bool Check { get; set; }
             public string Name { get; set; }
             public string Path { get; set; }
             public string Position { get; set; }
@@ -44,18 +50,18 @@ namespace Task_Layout_Manager
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            GetProcesses();
+            //FillDgv(ProcessManager.GetProcesses());
         }
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            GetProcesses();
+            FillDgv(ProcessManager.GetProcesses());
         }
 
-        private void GetProcesses()
+        private void FillDgv(List<TaskWindow> taskWindows)
         {
+            _tskwin = taskWindows;
             DgvProcessGrid.Items.Clear();
-            List<TaskWindow> taskWindows = ProcessManager.GetProcesses();
             foreach (TaskWindow tw in taskWindows)
             {
                 ImageSource image = null;
@@ -74,9 +80,11 @@ namespace Task_Layout_Manager
                     case 1:
                         windowstate = "Normal";
                         break;
+
                     case 2:
                         windowstate = "Minimized";
                         break;
+
                     case 3:
                         windowstate = "Maximized";
                         break;
@@ -95,20 +103,6 @@ namespace Task_Layout_Manager
 
             DgvProcessGrid.Items.Refresh();
         }
-
-
-
-
-        //private void Button_Click(object sender, RoutedEventArgs e)
-        //{
-        //    Process[] p = Process.GetProcessesByName("Task Layout Manager");
-
-        //    foreach (var proc in p)
-        //    {
-        //        ProcessManager.MovePorcessWindow(proc);
-        //    }
-        //}
-
 
         [DllImport("gdi32.dll", SetLastError = true)]
         private static extern bool DeleteObject(IntPtr hObject);
@@ -132,5 +126,44 @@ namespace Task_Layout_Manager
             return wpfBitmap;
         }
 
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (MyCommands row in DgvProcessGrid.Items)
+            {
+                Console.Write(row.Check + " | ");
+                Console.Write(row.Name + " | ");
+                Console.Write(row.Path + " | ");
+                Console.Write(row.Position + " | ");
+                Console.Write(row.Size + " | ");
+                Console.Write(row.WindowState + " | ");
+
+                Console.WriteLine();
+            }
+
+            //FileIo.SaveXml(_tskwin);
+        }
+
+        private void BtnLoad_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory,
+                Filter = "tlm files (*.tlm)|*.tlm|All files (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                FillDgv(FileIo.ReadXml(openFileDialog.FileName));
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        private void BtnClear_Click(object sender, RoutedEventArgs e)
+        {
+            DgvProcessGrid.Items.Clear();
+        }
     }
 }
