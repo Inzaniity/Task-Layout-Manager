@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Xml;
 
 namespace Task_Layout_Manager
@@ -61,7 +62,7 @@ namespace Task_Layout_Manager
                         height = int.Parse(childnode.Attributes["HEIGHT"]?.InnerText);
                         state = int.Parse(childnode.Attributes["STATE"]?.InnerText);
                     }
-                    taskWindows.Add(new TaskWindow(name, commandline, 0, state, x, y, height, width, null));
+                    taskWindows.Add(new TaskWindow(true, name, commandline, 0, state, x, y, height, width, ImageConverter.IconToImagesource(Icon.ExtractAssociatedIcon(commandline))));
                 }
             }
             return taskWindows;

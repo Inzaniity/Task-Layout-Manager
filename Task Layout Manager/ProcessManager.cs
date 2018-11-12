@@ -8,6 +8,9 @@ using System.Windows.Forms;
 namespace Task_Layout_Manager
 {
     using System.Windows;
+    using System.Windows.Interop;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
     using System.Windows.Shapes;
 
     internal class ProcessManager
@@ -80,22 +83,21 @@ namespace Task_Layout_Manager
 
                     if (width > 1 && height > 1)
                     {
-                        TaskWindow taskWindow = new TaskWindow(proc.ProcessName, proc.MainModule.FileName,
-                            placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd));
-                        TaskWindows.Add(taskWindow);
+                        TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
+                            placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
 
                         //debugging
                         var s = Screen.FromHandle(hWnd).DeviceName;
                         //Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
-                        Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
-                        Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
+                        //Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
+                        //Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
                     }
                 }
             }
             return TaskWindows;
         }
 
-        public static Icon GetAppIcon(IntPtr hwnd)
+        public static ImageSource GetAppIcon(IntPtr hwnd)
         {
             IntPtr iconHandle = SendMessage(hwnd, WmGeticon, IconSmall2, 0);
             if (iconHandle == IntPtr.Zero)
@@ -112,7 +114,9 @@ namespace Task_Layout_Manager
 
             Icon icn = Icon.FromHandle(iconHandle);
 
-            return icn;
+            ImageSource image = ImageConverter.IconToImagesource(icn);
+
+            return image;
         }
 
         public static IntPtr GetClassLongPtr(IntPtr hWnd, int nIndex)

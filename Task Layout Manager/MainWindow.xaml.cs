@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -12,7 +9,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MahApps.Metro.Controls;
-using CheckBox = System.Windows.Controls.CheckBox;
 
 namespace Task_Layout_Manager
 {
@@ -64,14 +60,6 @@ namespace Task_Layout_Manager
             DgvProcessGrid.Items.Clear();
             foreach (TaskWindow tw in taskWindows)
             {
-                ImageSource image = null;
-                if (tw.Icon != null)
-                {
-                    Bitmap bitmap = tw.Icon.ToBitmap();
-                    IntPtr hBitmap = bitmap.GetHbitmap();
-                    image = Imaging.CreateBitmapSourceFromHBitmap(hBitmap, IntPtr.Zero, Int32Rect.Empty,
-                        BitmapSizeOptions.FromEmptyOptions());
-                }
 
                 string windowstate = null;
 
@@ -92,7 +80,8 @@ namespace Task_Layout_Manager
 
                 DgvProcessGrid.Items.Add(new MyCommands
                 {
-                    Icon = image,
+                    Check = tw.Check,
+                    Icon = tw.Icon,
                     Name = tw.Name,
                     Path = tw.Path,
                     Position = tw.PosX + " : " + tw.PosY,
@@ -104,43 +93,10 @@ namespace Task_Layout_Manager
             DgvProcessGrid.Items.Refresh();
         }
 
-        [DllImport("gdi32.dll", SetLastError = true)]
-        private static extern bool DeleteObject(IntPtr hObject);
-
-        public static ImageSource ToImageSource(Icon icon)
-        {
-            Bitmap bitmap = icon.ToBitmap();
-            IntPtr hBitmap = bitmap.GetHbitmap();
-
-            ImageSource wpfBitmap = Imaging.CreateBitmapSourceFromHBitmap(
-                hBitmap,
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions());
-
-            if (!DeleteObject(hBitmap))
-            {
-                throw new Win32Exception();
-            }
-
-            return wpfBitmap;
-        }
-
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            foreach (MyCommands row in DgvProcessGrid.Items)
-            {
-                Console.Write(row.Check + " | ");
-                Console.Write(row.Name + " | ");
-                Console.Write(row.Path + " | ");
-                Console.Write(row.Position + " | ");
-                Console.Write(row.Size + " | ");
-                Console.Write(row.WindowState + " | ");
-
-                Console.WriteLine();
-            }
-
-            //FileIo.SaveXml(_tskwin);
+            Dgv_Selection();
+            FileIo.SaveXml(_tskwin);
         }
 
         private void BtnLoad_Click(object sender, RoutedEventArgs e)
@@ -164,6 +120,48 @@ namespace Task_Layout_Manager
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             DgvProcessGrid.Items.Clear();
+        }
+
+        private void Dgv_Selection()
+        {
+            _tskwin.Clear();
+
+            foreach (MyCommands row in DgvProcessGrid.Items)
+            {
+                if (row.Check)
+                {
+                    int winState = 0, x, y, height, width;
+                    switch (row.WindowState)
+                    {
+                        case "Normal":
+                            winState = 1;
+                            break;
+
+                        case "Minimized":
+                            winState = 2;
+                            break;
+
+                        case "Maximized":
+                            winState = 3;
+                            break;
+                    }
+                    string[] coords = row.Position.Split(':');
+                    x = int.Parse(coords[0]);
+                    y = int.Parse(coords[1]);
+
+                    string[] size = row.Size.Split(':');
+                    height = int.Parse(size[0]);
+                    width = int.Parse(size[1]);
+
+                    _tskwin.Add(new TaskWindow(true, row.Name, row.Path, 0, winState, x, y, height, width, row.Icon));
+                }
+            }
+            FillDgv(_tskwin);
+        }
+
+        private void BtnRefreshSelection_Click(object sender, RoutedEventArgs e)
+        {
+            Dgv_Selection();
         }
     }
 }

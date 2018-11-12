@@ -8,16 +8,16 @@
         mc:Ignorable="d"
         Title="Task Layout Manager" Height="450" Width="800" Loaded="Window_Loaded" Icon="icon.ico" ShowIconOnTitleBar="False">
     <Grid>
-        <DataGrid x:Name="DgvProcessGrid" Margin="10,59,10,10" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" CanUserResizeRows="False">
+        <DataGrid x:Name="DgvProcessGrid" Margin="10,35,10,10" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="auto" IsReadOnly="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="{Binding Path=Check, Mode=TwoWay}" />
+                            <CheckBox HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="{Binding Path=Check,  UpdateSourceTrigger=PropertyChanged}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Image" Width="auto" IsReadOnly="True">
+                <DataGridTemplateColumn Header="Icon" Width="auto" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Image Source="{Binding Icon, Mode=OneWay}" Width="16" Height="16" />
@@ -31,16 +31,19 @@
                 <DataGridTextColumn Binding="{Binding WindowState, Mode=OneWay}" IsReadOnly="True"  ClipboardContentBinding="{x:Null}" Header="WinState" Width="auto" />
             </DataGrid.Columns>
         </DataGrid>
-        <Menu HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="792">
+        <Menu Height="30" VerticalAlignment="Top" Margin="0,0,122,0">
             <MenuItem Header="File">
                 <MenuItem Header="Load" Click="BtnLoad_Click" />
                 <MenuItem Header="Save" Click="BtnSave_Click" />
                 <MenuItem Header="Exit" Click="Button_Click" />
             </MenuItem>
             <MenuItem Header="Processes">
-                <MenuItem Header="Refresh" Click="BtnRefresh_Click" />
+                <MenuItem Header="Load" Click="BtnRefresh_Click" />
                 <MenuItem Header="Clear" Click="BtnClear_Click" />
             </MenuItem>
+        </Menu>
+        <Menu Height="30" VerticalAlignment="Top" Margin="668,0,0,0" Width="121">
+            <MenuItem x:Name="BtnRefreshSelection" Header="Refresh Selection" Width="121" Click="BtnRefreshSelection_Click"/>
         </Menu>
     </Grid>
 </Controls:MetroWindow>
