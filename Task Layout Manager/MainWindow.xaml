@@ -6,25 +6,41 @@
         xmlns:local="clr-namespace:Task_Layout_Manager"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Task Layout Manager" Height="450" Width="800" Loaded="Window_Loaded">
+        Title="Task Layout Manager" Height="450" Width="800" Loaded="Window_Loaded" Icon="icon.ico" ShowIconOnTitleBar="False">
     <Grid>
-        <DataGrid x:Name="DgvProcessGrid" Margin="10,42,10,10">
+        <DataGrid x:Name="DgvProcessGrid" Margin="10,59,10,10" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" CanUserResizeRows="False">
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Image" Width="auto" IsReadOnly="True">
+                <DataGridTemplateColumn Width="auto" IsReadOnly="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding Icon}" Width="16" Height="16" />
+                            <CheckBox HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="{Binding Path=Check, Mode=TwoWay}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding Name}" ClipboardContentBinding="{x:Null}" Header="Name" Width="auto">
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path}" ClipboardContentBinding="{x:Null}" Header="Path" Width="*"/>
-                <DataGridTextColumn Binding="{Binding Position}" ClipboardContentBinding="{x:Null}" Header="Position (X:Y)" Width="auto"/>
-                <DataGridTextColumn Binding="{Binding Size}" ClipboardContentBinding="{x:Null}" Header="Size(H:W)" Width="auto"/>
-                <DataGridTextColumn Binding="{Binding WindowState}" ClipboardContentBinding="{x:Null}" Header="WinState" Width="auto"/>
+                <DataGridTemplateColumn Header="Image" Width="auto" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Icon, Mode=OneWay}" Width="16" Height="16" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Binding="{Binding Name, Mode=OneWay}" IsReadOnly="True" ClipboardContentBinding="{x:Null}" Header="Name" Width="auto" />
+                <DataGridTextColumn Binding="{Binding Path, Mode=OneWay}" IsReadOnly="True"  ClipboardContentBinding="{x:Null}" Header="Path" Width="*" />
+                <DataGridTextColumn Binding="{Binding Position, Mode=OneWay}" IsReadOnly="True"  ClipboardContentBinding="{x:Null}" Header="Position (X:Y)" Width="auto" />
+                <DataGridTextColumn Binding="{Binding Size, Mode=OneWay}" IsReadOnly="True"  ClipboardContentBinding="{x:Null}" Header="Size(H:W)" Width="auto" />
+                <DataGridTextColumn Binding="{Binding WindowState, Mode=OneWay}" IsReadOnly="True"  ClipboardContentBinding="{x:Null}" Header="WinState" Width="auto" />
             </DataGrid.Columns>
         </DataGrid>
-        <Button x:Name="BtnRefresh" Content="Refresh Processes" HorizontalAlignment="Left" Margin="671,10,0,0" VerticalAlignment="Top" Width="111" Click="BtnRefresh_Click"/>
+        <Menu HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="792">
+            <MenuItem Header="File">
+                <MenuItem Header="Load" Click="BtnLoad_Click" />
+                <MenuItem Header="Save" Click="BtnSave_Click" />
+                <MenuItem Header="Exit" Click="Button_Click" />
+            </MenuItem>
+            <MenuItem Header="Processes">
+                <MenuItem Header="Refresh" Click="BtnRefresh_Click" />
+                <MenuItem Header="Clear" Click="BtnClear_Click" />
+            </MenuItem>
+        </Menu>
     </Grid>
 </Controls:MetroWindow>
