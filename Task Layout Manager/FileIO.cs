@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Media;
 using System.Xml;
+using Microsoft.Win32;
 
 namespace Task_Layout_Manager
 {
@@ -8,35 +11,45 @@ namespace Task_Layout_Manager
     {
         public static void SaveXml(List<TaskWindow> tasks)
         {
-            XmlWriterSettings xmlWriterSettings = new XmlWriterSettings()
+            SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                Indent = true,
-                IndentChars = "\t",
-                NewLineOnAttributes = false
+                Filter = "TLM file (*.TLM)|*.TLM",
+                InitialDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                Title = "Load TLM file"
             };
 
-            using (XmlWriter writer = XmlWriter.Create("LAYOUT.tlm", xmlWriterSettings))
+            if (saveFileDialog.ShowDialog() == true)
             {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("TASK_LAYOUT_MANAGER");
-
-                foreach (TaskWindow tw in tasks)
+                XmlWriterSettings xmlWriterSettings = new XmlWriterSettings
                 {
-                    writer.WriteStartElement("WINDOW");
-                    writer.WriteAttributeString("NAME", tw.Name);
-                    writer.WriteAttributeString("COMMANDLINE", tw.Path);
-                    writer.WriteStartElement("POSITION");
-                    writer.WriteAttributeString("X", tw.PosX.ToString());
-                    writer.WriteAttributeString("Y", tw.PosY.ToString());
-                    writer.WriteAttributeString("WIDTH", tw.Width.ToString());
-                    writer.WriteAttributeString("HEIGHT", tw.Height.ToString());
-                    writer.WriteAttributeString("STATE", tw.ShowCmd.ToString());
-                    writer.WriteEndElement();
-                    writer.WriteEndElement();
-                }
+                    Indent = true,
+                    IndentChars = "\t",
+                    NewLineOnAttributes = false
+                };
 
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
+                using (XmlWriter writer = XmlWriter.Create(saveFileDialog.FileName, xmlWriterSettings))
+                {
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("TASK_LAYOUT_MANAGER");
+
+                    foreach (TaskWindow tw in tasks)
+                    {
+                        writer.WriteStartElement("WINDOW");
+                        writer.WriteAttributeString("NAME", tw.Name);
+                        writer.WriteAttributeString("COMMANDLINE", tw.Path);
+                        writer.WriteStartElement("POSITION");
+                        writer.WriteAttributeString("X", tw.PosX.ToString());
+                        writer.WriteAttributeString("Y", tw.PosY.ToString());
+                        writer.WriteAttributeString("WIDTH", tw.Width.ToString());
+                        writer.WriteAttributeString("HEIGHT", tw.Height.ToString());
+                        writer.WriteAttributeString("STATE", tw.ShowCmd.ToString());
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
+                }
             }
         }
 
@@ -44,7 +57,7 @@ namespace Task_Layout_Manager
         {
             List<TaskWindow> taskWindows = new List<TaskWindow>();
 
-            string name = "", commandline = "";
+            string commandline = "";
             int x = 0, y = 0, width = 0, height = 0, state = 0;
             XmlDocument doc = new XmlDocument();
             doc.Load(path);
@@ -52,7 +65,7 @@ namespace Task_Layout_Manager
             {
                 if (node.Name == "WINDOW")
                 {
-                    name = node.Attributes["NAME"]?.InnerText;
+                    var name = node.Attributes["NAME"]?.InnerText;
                     commandline = node.Attributes["COMMANDLINE"]?.InnerText;
                     foreach (XmlNode childnode in node)
                     {
@@ -62,7 +75,19 @@ namespace Task_Layout_Manager
                         height = int.Parse(childnode.Attributes["HEIGHT"]?.InnerText);
                         state = int.Parse(childnode.Attributes["STATE"]?.InnerText);
                     }
-                    taskWindows.Add(new TaskWindow(true, name, commandline, 0, state, x, y, height, width, ImageConverter.IconToImagesource(Icon.ExtractAssociatedIcon(commandline))));
+
+                    ImageSource imgsrc = null;
+
+                    try
+                    {
+                        imgsrc = ImageConverter.IconToImagesource(Icon.ExtractAssociatedIcon(commandline));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+
+                    taskWindows.Add(new TaskWindow(true, name, commandline, 0, state, x, y, height, width, imgsrc));
                 }
             }
             return taskWindows;

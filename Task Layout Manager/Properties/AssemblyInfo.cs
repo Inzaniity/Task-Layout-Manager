@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("Task Layout Manager")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("jmrlp")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Task Layout Manager")]
-[assembly: AssemblyCopyright("Copyright © jmrlp 2018")]
+[assembly: AssemblyCopyright("Copyright © Jan Blömacher 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

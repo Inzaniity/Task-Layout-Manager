@@ -9,16 +9,19 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MahApps.Metro.Controls;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Task_Layout_Manager
 {
     public partial class MainWindow : MetroWindow
     {
         private List<TaskWindow> _tskwin;
+        private readonly String[] args;
 
         public MainWindow()
         {
             InitializeComponent();
+            args = App.mArgs;
 
             Style rowStyle = new Style(typeof(DataGridRow));
 
@@ -46,7 +49,10 @@ namespace Task_Layout_Manager
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //FillDgv(ProcessManager.GetProcesses());
+            if (args != null)
+            {
+                FillDgv(FileIo.ReadXml(args[0]));
+            }
         }
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
@@ -60,7 +66,6 @@ namespace Task_Layout_Manager
             DgvProcessGrid.Items.Clear();
             foreach (TaskWindow tw in taskWindows)
             {
-
                 string windowstate = null;
 
                 switch (tw.ShowCmd)

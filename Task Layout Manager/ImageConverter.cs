@@ -7,17 +7,24 @@ using System.Windows.Media.Imaging;
 
 namespace Task_Layout_Manager
 {
-    class ImageConverter
+    internal class ImageConverter
     {
         public static ImageSource IconToImagesource(Icon icn)
         {
             ImageSource image = null;
-            if (icn != null)
+            try
             {
-                Bitmap bitmap = icn.ToBitmap();
-                IntPtr hBitmap = bitmap.GetHbitmap();
-                image = Imaging.CreateBitmapSourceFromHBitmap(hBitmap, IntPtr.Zero, Int32Rect.Empty,
-                    BitmapSizeOptions.FromEmptyOptions());
+                if (icn != null)
+                {
+                    Bitmap bitmap = icn.ToBitmap();
+                    IntPtr hBitmap = bitmap.GetHbitmap();
+                    image = Imaging.CreateBitmapSourceFromHBitmap(hBitmap, IntPtr.Zero, Int32Rect.Empty,
+                        BitmapSizeOptions.FromEmptyOptions());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
 
             return image;
