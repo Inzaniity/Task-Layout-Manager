@@ -35,6 +35,7 @@
             <MenuItem Header="File">
                 <MenuItem Header="Load" Click="BtnLoad_Click" />
                 <MenuItem Header="Save" Click="BtnSave_Click" />
+                <MenuItem Header="Apply Layout" Click="BtnApply_Click"/>
                 <MenuItem Header="Exit" Click="Button_Click" />
             </MenuItem>
             <MenuItem Header="Processes">

@@ -50,6 +50,7 @@ namespace Task_Layout_Manager
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
                 }
+                Notification.ShowNotification("Saved to " + saveFileDialog.FileName, "s");
             }
         }
 

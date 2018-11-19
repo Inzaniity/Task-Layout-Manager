@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using MahApps.Metro.Controls;
-using MessageBox = System.Windows.MessageBox;
 
 namespace Task_Layout_Manager
 {
@@ -57,7 +53,7 @@ namespace Task_Layout_Manager
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            FillDgv(ProcessManager.GetProcesses());
+            FillDgv(ProcessManager.GetProcesses());            
         }
 
         private void FillDgv(List<TaskWindow> taskWindows)
@@ -96,6 +92,7 @@ namespace Task_Layout_Manager
             }
 
             DgvProcessGrid.Items.Refresh();
+
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
@@ -167,6 +164,11 @@ namespace Task_Layout_Manager
         private void BtnRefreshSelection_Click(object sender, RoutedEventArgs e)
         {
             Dgv_Selection();
+        }
+
+        private void BtnApply_Click(object sender, RoutedEventArgs e)
+        {
+            ProcessManager.MovePorcessWindow(_tskwin);
         }
     }
 }

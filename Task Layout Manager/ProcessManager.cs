@@ -7,11 +7,8 @@ using System.Windows.Forms;
 
 namespace Task_Layout_Manager
 {
-    using System.Windows;
-    using System.Windows.Interop;
+    using System.Threading;
     using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-    using System.Windows.Shapes;
 
     internal class ProcessManager
     {
@@ -23,6 +20,9 @@ namespace Task_Layout_Manager
         public const int IconBig = 1;
         public const int IconSmall2 = 2;
         public const int WmGeticon = 0x7F;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
@@ -48,9 +48,9 @@ namespace Task_Layout_Manager
             public int length;
             public int Flags;
             public int ShowCmd;
-            public System.Drawing.Point ptMinPosition;
-            public System.Drawing.Point ptMaxPosition;
-            public System.Drawing.Rectangle rcNormalPosition;
+            public Point ptMinPosition;
+            public Point ptMaxPosition;
+            public Rectangle rcNormalPosition;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -127,9 +127,43 @@ namespace Task_Layout_Manager
                 return new IntPtr(GetClassLongPtr32(hWnd, nIndex));
         }
 
-        public static void MovePorcessWindow(Process p)
+        public static void MovePorcessWindow(List<TaskWindow> tws)
         {
-            MoveWindow(p.MainWindowHandle, 0, 0, 500, 500, true);
+            foreach (TaskWindow tw in tws)
+            {
+                bool error = false; 
+                IntPtr hWnd;
+                hWnd = FindWindow(tw.Name, tw.Name);
+                if (hWnd != IntPtr.Zero)
+                {
+                    MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                }
+                else
+                {
+                    Process.Start(tw.Path);
+                    int tries = 0;
+                    while (hWnd == IntPtr.Zero)
+                    {
+                        tries++;
+                        Thread.Sleep(100);
+                        hWnd = FindWindow(null, tw.Name);
+                        if (tries >= 25)
+                        {                            
+                            error = true;
+                            break;
+                        }
+                    }
+                    if(error)
+                    {
+                        Notification.ShowNotification("Error finding Window", "e");
+                    }
+                    else
+                    {
+                        Thread.Sleep(1000);
+                        MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                    }                    
+                }
+            }
         }
     }
 }
