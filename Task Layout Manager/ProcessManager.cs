@@ -131,39 +131,88 @@ namespace Task_Layout_Manager
         {
             foreach (TaskWindow tw in tws)
             {
-                bool error = false; 
-                IntPtr hWnd;
-                hWnd = FindWindow(tw.Name, tw.Name);
-                if (hWnd != IntPtr.Zero)
+                var processes = Process.GetProcessesByName(tw.Name);
+
+                if (processes.Length != 0)
                 {
-                    MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                    foreach (var process in processes)
+                    {
+                        //bool error = false;
+                        IntPtr hWnd = IntPtr.Zero;
+                        if (process.ProcessName == tw.Name)
+                        {
+                            hWnd = process.MainWindowHandle;
+                            if (hWnd != IntPtr.Zero)
+                            {
+                                MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                            }
+                        }
+                    }
                 }
                 else
                 {
+                    IntPtr hWnd = IntPtr.Zero;
                     Process.Start(tw.Path);
+                    Thread.Sleep(5000);
                     int tries = 0;
                     while (hWnd == IntPtr.Zero)
                     {
+                        bool found = false;
+                        processes = Process.GetProcesses();
+                        foreach (var proc in processes)
+                        {
+                            if (proc.ProcessName == tw.Name)
+                            {
+                                hWnd = proc.MainWindowHandle;
+                                MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                                found = true;
+                                break;
+                            }
+                        }
+
                         tries++;
                         Thread.Sleep(100);
                         hWnd = FindWindow(null, tw.Name);
-                        if (tries >= 25)
-                        {                            
-                            error = true;
+                        if (tries >= 25 || found)
+                        {
                             break;
                         }
                     }
-                    if(error)
-                    {
-                        Notification.ShowNotification("Error finding Window", "e");
-                    }
-                    else
-                    {
-                        Thread.Sleep(1000);
-                        MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-                    }                    
                 }
+
             }
         }
+        //bool error = false; 
+        //IntPtr hWnd;
+        //hWnd = FindWindow(tw.Name, tw.Name);
+        //if (hWnd != IntPtr.Zero)
+        //{
+        //    MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+        //}
+        //else
+        //{
+        //    Process.Start(tw.Path);
+        //    int tries = 0;
+        //    while (hWnd == IntPtr.Zero)
+        //    {
+        //        tries++;
+        //        Thread.Sleep(100);
+        //        hWnd = FindWindow(null, tw.Name);
+        //        if (tries >= 25)
+        //        {                            
+        //            error = true;
+        //            break;
+        //        }
+        //    }
+        //    if(error)
+        //    {
+        //        Notification.ShowNotification("Error finding Window", "e");
+        //    }
+        //    else
+        //    {
+        //        Thread.Sleep(1000);
+        //        MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+        //    }                    
+        //}
     }
 }
