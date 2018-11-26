@@ -22,7 +22,7 @@ namespace Task_Layout_Manager
         public const int WmGeticon = 0x7F;
 
         [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
@@ -85,7 +85,7 @@ namespace Task_Layout_Manager
                     {
                         TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
                             placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
-
+                        // X Y H W
                         //debugging
                         var s = Screen.FromHandle(hWnd).DeviceName;
                         //Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
@@ -144,6 +144,8 @@ namespace Task_Layout_Manager
                             hWnd = process.MainWindowHandle;
                             if (hWnd != IntPtr.Zero)
                             {
+                                // X Y H W
+
                                 MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
                             }
                         }
@@ -164,9 +166,22 @@ namespace Task_Layout_Manager
                             if (proc.ProcessName == tw.Name)
                             {
                                 hWnd = proc.MainWindowHandle;
-                                MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-                                found = true;
-                                break;
+
+                                if (hWnd != IntPtr.Zero)
+                                {
+                                    GetWindowRect(hWnd, out var rct);
+                                    while (rct.Left != tw.PosX && rct.Top != tw.PosY && tw.Width != rct.Right - rct.Left + 1 && tw.Height != rct.Bottom - rct.Top + 1)
+                                    {
+                                        if (tries >= 50)
+                                            break;
+                                        MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                                        Thread.Sleep(500);
+                                        tries++;
+                                    }
+                                    MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
 
@@ -179,10 +194,10 @@ namespace Task_Layout_Manager
                         }
                     }
                 }
-
             }
         }
-        //bool error = false; 
+
+        //bool error = false;
         //IntPtr hWnd;
         //hWnd = FindWindow(tw.Name, tw.Name);
         //if (hWnd != IntPtr.Zero)
@@ -199,7 +214,7 @@ namespace Task_Layout_Manager
         //        Thread.Sleep(100);
         //        hWnd = FindWindow(null, tw.Name);
         //        if (tries >= 25)
-        //        {                            
+        //        {
         //            error = true;
         //            break;
         //        }
@@ -212,7 +227,7 @@ namespace Task_Layout_Manager
         //    {
         //        Thread.Sleep(1000);
         //        MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-        //    }                    
+        //    }
         //}
     }
 }
