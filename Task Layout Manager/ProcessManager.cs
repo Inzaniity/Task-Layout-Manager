@@ -129,6 +129,13 @@ namespace Task_Layout_Manager
 
         public static void MovePorcessWindow(List<TaskWindow> tws)
         {
+            // First open all processes that aren't already open
+            // THEN apply the layout
+
+            StartProcs(tws);
+
+            Thread.Sleep(5000);
+
             foreach (TaskWindow tw in tws)
             {
                 var processes = Process.GetProcessesByName(tw.Name);
@@ -154,8 +161,6 @@ namespace Task_Layout_Manager
                 else
                 {
                     IntPtr hWnd = IntPtr.Zero;
-                    Process.Start(tw.Path);
-                    Thread.Sleep(5000);
                     int tries = 0;
                     while (hWnd == IntPtr.Zero)
                     {
@@ -169,16 +174,23 @@ namespace Task_Layout_Manager
 
                                 if (hWnd != IntPtr.Zero)
                                 {
-                                    GetWindowRect(hWnd, out var rct);
-                                    while (rct.Left != tw.PosX && rct.Top != tw.PosY && tw.Width != rct.Right - rct.Left + 1 && tw.Height != rct.Bottom - rct.Top + 1)
+                                    var tries2 = 0;
+                                    Rect rct;
+                                    GetWindowRect(hWnd, out rct);
+                                    var width = rct.Right - rct.Left + 1;
+                                    var height = rct.Bottom - rct.Top + 1;
+                                    while (rct.Left != tw.PosX && rct.Top != tw.PosY && tw.Width != width && tw.Height != height)
                                     {
-                                        if (tries >= 50)
+                                        if (tries2 >= 50)
                                             break;
                                         MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-                                        Thread.Sleep(500);
-                                        tries++;
+                                        GetWindowRect(hWnd, out rct);
+                                        width = rct.Right - rct.Left + 1;
+                                        height = rct.Bottom - rct.Top + 1;
+                                        Thread.Sleep(100);
+                                        tries2++;
                                     }
-                                    MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                                    //MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
                                     found = true;
                                     break;
                                 }
@@ -193,6 +205,19 @@ namespace Task_Layout_Manager
                             break;
                         }
                     }
+                }
+            }
+        }
+
+        private static void StartProcs(List<TaskWindow> tws)
+        {
+            foreach (TaskWindow tw in tws)
+            {
+                var processes = Process.GetProcessesByName(tw.Name);
+
+                if (processes.Length == 0)
+                {
+                    Process.Start(tw.Path);
                 }
             }
         }

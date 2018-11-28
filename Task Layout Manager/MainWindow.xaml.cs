@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -166,9 +167,9 @@ namespace Task_Layout_Manager
             Dgv_Selection();
         }
 
-        private void BtnApply_Click(object sender, RoutedEventArgs e)
+        private async void BtnApply_Click(object sender, RoutedEventArgs e)
         {
-            ProcessManager.MovePorcessWindow(_tskwin);
+            await Task.Run(() => ProcessManager.MovePorcessWindow(_tskwin));
         }
     }
 }
