@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace Task_Layout_Manager
 {
@@ -33,6 +34,10 @@ namespace Task_Layout_Manager
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetWindowPlacement(IntPtr hWnd, ref Windowplacement lpwndpl);
+        //  Hide = 0,
+        //  Normal = 1,
+        //  Minimized = 2,
+        //  Maximized = 3,
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
@@ -42,6 +47,9 @@ namespace Task_Layout_Manager
 
         [DllImport("user32.dll", EntryPoint = "GetClassLongPtr")]
         public static extern IntPtr GetClassLongPtr64(IntPtr hWnd, int nIndex);
+
+        [DllImport("User32")]
+        private static extern int ShowWindow(IntPtr hwnd, int nCmdShow);
 
         public struct Windowplacement
         {
@@ -127,6 +135,14 @@ namespace Task_Layout_Manager
                 return new IntPtr(GetClassLongPtr32(hWnd, nIndex));
         }
 
+        private static Windowplacement GetPlacement(IntPtr hwnd)
+        {
+            Windowplacement placement = new Windowplacement();
+            placement.length = Marshal.SizeOf(placement);
+            GetWindowPlacement(hwnd, ref placement);
+            return placement;
+        }
+
         public static void MovePorcessWindow(List<TaskWindow> tws)
         {
             // First open all processes that aren't already open
@@ -151,61 +167,35 @@ namespace Task_Layout_Manager
                             hWnd = process.MainWindowHandle;
                             if (hWnd != IntPtr.Zero)
                             {
-                                // X Y H W
-
+                                Console.WriteLine(GetPlacement(hWnd).ShowCmd);
+                                int state = GetPlacement(hWnd).ShowCmd;
+                                if (state == 2 || state == 3)
+                                    ShowWindow(hWnd, 9);
+                                var tries2 = 0;
+                                Rect rct;
+                                GetWindowRect(hWnd, out rct);
+                                var width = rct.Right - rct.Left + 1;
+                                var height = rct.Bottom - rct.Top + 1;
                                 MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    IntPtr hWnd = IntPtr.Zero;
-                    int tries = 0;
-                    while (hWnd == IntPtr.Zero)
-                    {
-                        bool found = false;
-                        processes = Process.GetProcesses();
-                        foreach (var proc in processes)
-                        {
-                            if (proc.ProcessName == tw.Name)
-                            {
-                                hWnd = proc.MainWindowHandle;
-
-                                if (hWnd != IntPtr.Zero)
+                                while (rct.Left != tw.PosX && rct.Top != tw.PosY && tw.Width != width && tw.Height != height)
                                 {
-                                    var tries2 = 0;
-                                    Rect rct;
-                                    GetWindowRect(hWnd, out rct);
-                                    var width = rct.Right - rct.Left + 1;
-                                    var height = rct.Bottom - rct.Top + 1;
-                                    while (rct.Left != tw.PosX && rct.Top != tw.PosY && tw.Width != width && tw.Height != height)
+                                    if (tries2 >= 50)
                                     {
-                                        if (tries2 >= 50)
-                                            break;
-                                        MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-                                        GetWindowRect(hWnd, out rct);
-                                        width = rct.Right - rct.Left + 1;
-                                        height = rct.Bottom - rct.Top + 1;
-                                        Thread.Sleep(100);
-                                        tries2++;
+                                        break;
                                     }
-                                    //MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-                                    found = true;
-                                    break;
+                                    MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
+                                    GetWindowRect(hWnd, out rct);
+                                    width = rct.Right - rct.Left + 1;
+                                    height = rct.Bottom - rct.Top + 1;
+                                    Thread.Sleep(100);
+                                    tries2++;
                                 }
+                                // X Y H W
                             }
-                        }
-
-                        tries++;
-                        Thread.Sleep(100);
-                        hWnd = FindWindow(null, tw.Name);
-                        if (tries >= 25 || found)
-                        {
-                            break;
                         }
                     }
                 }
+
             }
         }
 
@@ -222,37 +212,5 @@ namespace Task_Layout_Manager
             }
         }
 
-        //bool error = false;
-        //IntPtr hWnd;
-        //hWnd = FindWindow(tw.Name, tw.Name);
-        //if (hWnd != IntPtr.Zero)
-        //{
-        //    MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-        //}
-        //else
-        //{
-        //    Process.Start(tw.Path);
-        //    int tries = 0;
-        //    while (hWnd == IntPtr.Zero)
-        //    {
-        //        tries++;
-        //        Thread.Sleep(100);
-        //        hWnd = FindWindow(null, tw.Name);
-        //        if (tries >= 25)
-        //        {
-        //            error = true;
-        //            break;
-        //        }
-        //    }
-        //    if(error)
-        //    {
-        //        Notification.ShowNotification("Error finding Window", "e");
-        //    }
-        //    else
-        //    {
-        //        Thread.Sleep(1000);
-        //        MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
-        //    }
-        //}
     }
 }

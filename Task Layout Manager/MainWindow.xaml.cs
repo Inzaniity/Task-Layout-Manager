@@ -54,7 +54,7 @@ namespace Task_Layout_Manager
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            FillDgv(ProcessManager.GetProcesses());            
+            FillDgv(ProcessManager.GetProcesses());
         }
 
         private void FillDgv(List<TaskWindow> taskWindows)
@@ -93,7 +93,6 @@ namespace Task_Layout_Manager
             }
 
             DgvProcessGrid.Items.Refresh();
-
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
