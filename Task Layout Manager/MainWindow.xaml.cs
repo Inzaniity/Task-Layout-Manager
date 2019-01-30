@@ -170,5 +170,11 @@ namespace Task_Layout_Manager
         {
             await Task.Run(() => ProcessManager.MovePorcessWindow(_tskwin));
         }
+
+        private void BtnIgnore_Click(object sender, RoutedEventArgs e)
+        {
+            IgnoredProcessesWindow ipW = new IgnoredProcessesWindow();
+            ipW.ShowDialog();
+        }
     }
 }

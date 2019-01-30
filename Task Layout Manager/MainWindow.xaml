@@ -41,6 +41,7 @@
             <MenuItem Header="Processes">
                 <MenuItem Header="Load" Click="BtnRefresh_Click" />
                 <MenuItem Header="Clear" Click="BtnClear_Click" />
+                <MenuItem Header="Manage Ignored Processes" Click="BtnIgnore_Click"/>
             </MenuItem>
         </Menu>
         <Menu Height="30" VerticalAlignment="Top" Margin="668,0,0,0" Width="121">

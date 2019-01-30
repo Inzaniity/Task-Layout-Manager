@@ -86,7 +86,7 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
@@ -130,9 +130,16 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="FileIO.cs" />
+    <Compile Include="IgnoredProcessesWindow.xaml.cs">
+      <DependentUpon>IgnoredProcessesWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ImageConverter.cs" />
     <Compile Include="Notification.cs" />
     <Compile Include="TaskWindow.cs" />
+    <Page Include="IgnoredProcessesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

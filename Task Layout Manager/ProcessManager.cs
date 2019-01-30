@@ -14,6 +14,7 @@ namespace Task_Layout_Manager
     internal class ProcessManager
     {
         private static readonly List<TaskWindow> TaskWindows = new List<TaskWindow>();
+        public static string[] ignoredProcesses;
 
         public const int GclHiconsm = -34;
         public const int GclHicon = -14;
@@ -70,8 +71,9 @@ namespace Task_Layout_Manager
             public int Bottom;      // y position of lower-right corner
         }
 
-        public static List<TaskWindow> GetProcesses()
+        public static List<TaskWindow> GetProcesses(bool getAll = false)
         {
+            ignoredProcesses = Properties.Settings.Default.ignoredProcesses.Split(',');
             TaskWindows.Clear();
 
             Process[] procs = Process.GetProcesses();
@@ -79,26 +81,68 @@ namespace Task_Layout_Manager
             {
                 IntPtr hWnd;
                 Windowplacement placement = new Windowplacement();
-                if ((hWnd = proc.MainWindowHandle) != IntPtr.Zero)
+
+                if (getAll)
                 {
-                    GetWindowPlacement(proc.MainWindowHandle, ref placement);
-                    GetWindowRect(hWnd, out var rct);
-
-                    //ShowCmd = Windowstate
-                    // 1 = Normal, 2 = Minimized, 3 = Maximized
-                    int width = rct.Right - rct.Left + 1;
-                    int height = rct.Bottom - rct.Top + 1;
-
-                    if (width > 1 && height > 1)
+                    if ((hWnd = proc.MainWindowHandle) != IntPtr.Zero)
                     {
-                        TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
-                            placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
-                        // X Y H W
-                        //debugging
-                        var s = Screen.FromHandle(hWnd).DeviceName;
-                        //Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
-                        //Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
-                        //Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
+                        try
+                        {
+                            GetWindowPlacement(proc.MainWindowHandle, ref placement);
+                            GetWindowRect(hWnd, out var rct);
+
+                            //ShowCmd = Windowstate
+                            // 1 = Normal, 2 = Minimized, 3 = Maximized
+                            int width = rct.Right - rct.Left + 1;
+                            int height = rct.Bottom - rct.Top + 1;
+
+                            if (width > 1 && height > 1)
+                            {
+                                TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
+                                    placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
+                                // X Y H W
+                                //debugging
+                                var s = Screen.FromHandle(hWnd).DeviceName;
+                                //Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
+                                //Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
+                                //Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }
+
+                    }
+                }
+                else
+                {
+                    //Ignore Processes that are listed in ignoredProcesses
+                    if (Array.IndexOf(ignoredProcesses, proc.ProcessName) == -1)
+                    {
+                        if ((hWnd = proc.MainWindowHandle) != IntPtr.Zero)
+                        {
+                            GetWindowPlacement(proc.MainWindowHandle, ref placement);
+                            GetWindowRect(hWnd, out var rct);
+
+                            //ShowCmd = Windowstate
+                            // 1 = Normal, 2 = Minimized, 3 = Maximized
+                            int width = rct.Right - rct.Left + 1;
+                            int height = rct.Bottom - rct.Top + 1;
+
+                            if (width > 1 && height > 1)
+                            {
+                                TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
+                                    placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
+                                // X Y H W
+                                //debugging
+                                var s = Screen.FromHandle(hWnd).DeviceName;
+                                //Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
+                                //Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
+                                //Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
+                            }
+                        }
                     }
                 }
             }
@@ -150,7 +194,6 @@ namespace Task_Layout_Manager
 
             StartProcs(tws);
 
-            Thread.Sleep(5000);
 
             foreach (TaskWindow tw in tws)
             {
@@ -172,8 +215,7 @@ namespace Task_Layout_Manager
                                 if (state == 2 || state == 3)
                                     ShowWindow(hWnd, 9);
                                 var tries2 = 0;
-                                Rect rct;
-                                GetWindowRect(hWnd, out rct);
+                                GetWindowRect(hWnd, out Rect rct);
                                 var width = rct.Right - rct.Left + 1;
                                 var height = rct.Bottom - rct.Top + 1;
                                 MoveWindow(hWnd, tw.PosX, tw.PosY, tw.Width, tw.Height, true);
@@ -210,6 +252,7 @@ namespace Task_Layout_Manager
                     Process.Start(tw.Path);
                 }
             }
+            //Thread.Sleep(5000);
         }
 
     }

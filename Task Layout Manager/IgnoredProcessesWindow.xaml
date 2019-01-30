@@ -1,0 +1,38 @@
+﻿<Controls:MetroWindow x:Class="Task_Layout_Manager.IgnoredProcessesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"        
+        xmlns:local="clr-namespace:Task_Layout_Manager"
+        mc:Ignorable="d"
+        Title="Manage Ignored Processes" Height="450" Width="707.522" WindowStyle="ToolWindow" Loaded="MetroWindow_Loaded">
+    <Grid>
+        <ListBox x:Name="ListView_AllProcs" HorizontalAlignment="Left" Height="362" Margin="10,48,0,0" VerticalAlignment="Top" Width="278" BorderThickness="1"/>
+        <Button x:Name="Btn_MoveToIgnore" HorizontalAlignment="Left" Margin="311,145,0,0" VerticalAlignment="Top" Width="70" Click="Btn_MoveToIgnore_Click" Height="39">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="25" Height="15"
+                                       Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_arrow_right}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </StackPanel>
+        </Button>
+        <Button x:Name="Btn_RemoveFromIgnore" HorizontalAlignment="Left" Margin="311,203,0,0" VerticalAlignment="Top" Width="70" Click="Btn_RemoveFromIgnore_Click" Height="39">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="25" Height="15"
+                                       Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_arrow_left}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </StackPanel>
+        </Button>
+        <ListBox x:Name="ListView_IgnoredProcs" HorizontalAlignment="Left" Height="362" Margin="405,48,0,0" VerticalAlignment="Top" Width="278" BorderThickness="1"/>
+        <Label Content="Currently running processes" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="278" Height="33"/>
+        <Label Content="Ignored processes" HorizontalAlignment="Left" Margin="405,10,0,0" VerticalAlignment="Top" Width="278" Height="33"/>
+
+
+    </Grid>
+</Controls:MetroWindow>

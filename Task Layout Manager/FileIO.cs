@@ -35,14 +35,14 @@ namespace Task_Layout_Manager
                     foreach (TaskWindow tw in tasks)
                     {
                         writer.WriteStartElement("WINDOW");
-                        writer.WriteAttributeString("NAME", tw.Name);
-                        writer.WriteAttributeString("COMMANDLINE", tw.Path);
+                            writer.WriteAttributeString("NAME", tw.Name);
+                            writer.WriteAttributeString("COMMANDLINE", tw.Path);
                         writer.WriteStartElement("POSITION");
-                        writer.WriteAttributeString("X", tw.PosX.ToString());
-                        writer.WriteAttributeString("Y", tw.PosY.ToString());
-                        writer.WriteAttributeString("WIDTH", tw.Width.ToString());
-                        writer.WriteAttributeString("HEIGHT", tw.Height.ToString());
-                        writer.WriteAttributeString("STATE", tw.ShowCmd.ToString());
+                            writer.WriteAttributeString("X", tw.PosX.ToString());
+                            writer.WriteAttributeString("Y", tw.PosY.ToString());
+                            writer.WriteAttributeString("WIDTH", tw.Width.ToString());
+                            writer.WriteAttributeString("HEIGHT", tw.Height.ToString());
+                            writer.WriteAttributeString("STATE", tw.ShowCmd.ToString());
                         writer.WriteEndElement();
                         writer.WriteEndElement();
                     }
