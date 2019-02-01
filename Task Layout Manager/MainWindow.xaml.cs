@@ -12,9 +12,8 @@ namespace Task_Layout_Manager
 {
     public partial class MainWindow : MetroWindow
     {
-        private List<TaskWindow> _tskwin;
         private readonly String[] args;
-
+        private List<TaskWindow> _tskwin;
         public MainWindow()
         {
             InitializeComponent();
@@ -33,28 +32,94 @@ namespace Task_Layout_Manager
             // Some operations with this row
         }
 
-        public struct MyCommands
+        private async void BtnApply_Click(object sender, RoutedEventArgs e)
         {
-            public bool Check { get; set; }
-            public string Name { get; set; }
-            public string Path { get; set; }
-            public string Position { get; set; }
-            public string Size { get; set; }
-            public ImageSource Icon { get; set; }
-            public string WindowState { get; set; }
+            ProgressBar_Status.Visibility = Visibility.Visible;
+            await Task.Run(() => ProcessManager.MovePorcessWindow(_tskwin));
+            ProgressBar_Status.Visibility = Visibility.Hidden;
+
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
-            if (args != null)
+            DgvProcessGrid.Items.Clear();
+        }
+
+        private void BtnIgnore_Click(object sender, RoutedEventArgs e)
+        {
+            IgnoredProcessesWindow ipW = new IgnoredProcessesWindow();
+            ipW.ShowDialog();
+        }
+
+        private void BtnLoad_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                FillDgv(FileIo.ReadXml(args[0]));
+                InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory,
+                Filter = "tlm files (*.tlm)|*.tlm|All files (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                FillDgv(FileIo.ReadXml(openFileDialog.FileName));
             }
         }
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
             FillDgv(ProcessManager.GetProcesses());
+        }
+
+        private void BtnRefreshSelection_Click(object sender, RoutedEventArgs e)
+        {
+            Dgv_Selection();
+        }
+
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            Dgv_Selection();
+            FileIo.SaveXml(_tskwin);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        private void Dgv_Selection()
+        {
+            _tskwin.Clear();
+
+            foreach (MyCommands row in DgvProcessGrid.Items)
+            {
+                if (row.Check)
+                {
+                    int winState = 0, x, y, height, width;
+                    switch (row.WindowState)
+                    {
+                        case "Normal":
+                            winState = 1;
+                            break;
+
+                        case "Minimized":
+                            winState = 2;
+                            break;
+
+                        case "Maximized":
+                            winState = 3;
+                            break;
+                    }
+                    string[] coords = row.Position.Split(':');
+                    x = int.Parse(coords[0]);
+                    y = int.Parse(coords[1]);
+
+                    string[] size = row.Size.Split(':');
+                    height = int.Parse(size[0]);
+                    width = int.Parse(size[1]);
+
+                    _tskwin.Add(new TaskWindow(true, row.Name, row.Path, 0, winState, x, y, height, width, row.Icon));
+                }
+            }
+            FillDgv(_tskwin);
         }
 
         private void FillDgv(List<TaskWindow> taskWindows)
@@ -95,86 +160,23 @@ namespace Task_Layout_Manager
             DgvProcessGrid.Items.Refresh();
         }
 
-        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Dgv_Selection();
-            FileIo.SaveXml(_tskwin);
-        }
-
-        private void BtnLoad_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            if (args != null)
             {
-                InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory,
-                Filter = "tlm files (*.tlm)|*.tlm|All files (*.*)|*.*"
-            };
-            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                FillDgv(FileIo.ReadXml(openFileDialog.FileName));
+                FillDgv(FileIo.ReadXml(args[0]));
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        public struct MyCommands
         {
-            System.Windows.Application.Current.Shutdown();
-        }
-
-        private void BtnClear_Click(object sender, RoutedEventArgs e)
-        {
-            DgvProcessGrid.Items.Clear();
-        }
-
-        private void Dgv_Selection()
-        {
-            _tskwin.Clear();
-
-            foreach (MyCommands row in DgvProcessGrid.Items)
-            {
-                if (row.Check)
-                {
-                    int winState = 0, x, y, height, width;
-                    switch (row.WindowState)
-                    {
-                        case "Normal":
-                            winState = 1;
-                            break;
-
-                        case "Minimized":
-                            winState = 2;
-                            break;
-
-                        case "Maximized":
-                            winState = 3;
-                            break;
-                    }
-                    string[] coords = row.Position.Split(':');
-                    x = int.Parse(coords[0]);
-                    y = int.Parse(coords[1]);
-
-                    string[] size = row.Size.Split(':');
-                    height = int.Parse(size[0]);
-                    width = int.Parse(size[1]);
-
-                    _tskwin.Add(new TaskWindow(true, row.Name, row.Path, 0, winState, x, y, height, width, row.Icon));
-                }
-            }
-            FillDgv(_tskwin);
-        }
-
-        private void BtnRefreshSelection_Click(object sender, RoutedEventArgs e)
-        {
-            Dgv_Selection();
-        }
-
-        private async void BtnApply_Click(object sender, RoutedEventArgs e)
-        {
-            await Task.Run(() => ProcessManager.MovePorcessWindow(_tskwin));
-        }
-
-        private void BtnIgnore_Click(object sender, RoutedEventArgs e)
-        {
-            IgnoredProcessesWindow ipW = new IgnoredProcessesWindow();
-            ipW.ShowDialog();
+            public bool Check { get; set; }
+            public ImageSource Icon { get; set; }
+            public string Name { get; set; }
+            public string Path { get; set; }
+            public string Position { get; set; }
+            public string Size { get; set; }
+            public string WindowState { get; set; }
         }
     }
 }

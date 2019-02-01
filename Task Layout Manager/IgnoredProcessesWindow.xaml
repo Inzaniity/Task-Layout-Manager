@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Manage Ignored Processes" Height="450" Width="707.522" WindowStyle="ToolWindow" Loaded="MetroWindow_Loaded">
     <Grid>
-        <ListBox x:Name="ListView_AllProcs" HorizontalAlignment="Left" Height="362" Margin="10,48,0,0" VerticalAlignment="Top" Width="278" BorderThickness="1"/>
+        <ListBox x:Name="ListView_AllProcs" HorizontalAlignment="Left" Height="362" Margin="10,48,0,0" VerticalAlignment="Top" Width="278" BorderThickness="1" MouseDoubleClick="ListView_AllProcs_MouseDoubleClick"/>
         <Button x:Name="Btn_MoveToIgnore" HorizontalAlignment="Left" Margin="311,145,0,0" VerticalAlignment="Top" Width="70" Click="Btn_MoveToIgnore_Click" Height="39">
             <StackPanel Orientation="Horizontal">
                 <Rectangle Width="25" Height="15"
@@ -29,7 +29,7 @@
                 </Rectangle>
             </StackPanel>
         </Button>
-        <ListBox x:Name="ListView_IgnoredProcs" HorizontalAlignment="Left" Height="362" Margin="405,48,0,0" VerticalAlignment="Top" Width="278" BorderThickness="1"/>
+        <ListBox x:Name="ListView_IgnoredProcs" HorizontalAlignment="Left" Height="362" Margin="405,48,0,0" VerticalAlignment="Top" Width="278" BorderThickness="1" MouseDoubleClick="ListView_IgnoredProcs_MouseDoubleClick"/>
         <Label Content="Currently running processes" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="278" Height="33"/>
         <Label Content="Ignored processes" HorizontalAlignment="Left" Margin="405,10,0,0" VerticalAlignment="Top" Width="278" Height="33"/>
 

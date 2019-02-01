@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Task Layout Manager" Height="450" Width="800" Loaded="Window_Loaded" Icon="icon.ico" ShowIconOnTitleBar="False">
     <Grid>
-        <DataGrid x:Name="DgvProcessGrid" Margin="10,35,10,10" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False">
+        <DataGrid x:Name="DgvProcessGrid" Margin="10,35" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="auto" IsReadOnly="False">
                     <DataGridTemplateColumn.CellTemplate>
@@ -47,5 +47,9 @@
         <Menu Height="30" VerticalAlignment="Top" Margin="668,0,0,0" Width="121">
             <MenuItem x:Name="BtnRefreshSelection" Header="Refresh Selection" Width="121" Click="BtnRefreshSelection_Click"/>
         </Menu>
+        <StatusBar Height="30" Margin="0,389,0,0" VerticalAlignment="Center">
+            <Label x:Name="Lbl_StatusBar" Content="" Width="752" Height="32"/>
+            <Controls:ProgressRing x:Name="ProgressBar_Status" Width="Auto" Height="Auto" Foreground="#CCFFFFFF"/>
+        </StatusBar>
     </Grid>
 </Controls:MetroWindow>
