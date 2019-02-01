@@ -22,33 +22,27 @@ namespace Task_Layout_Manager
         public static string[] ignoredProcesses;
         private static readonly List<TaskWindow> TaskWindows = new List<TaskWindow>();
 
-        #region "DLL-Import"
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetWindowRect(IntPtr hwnd, out Rect rectangle);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetWindowPlacement(IntPtr hWnd, ref Windowplacement lpwndpl);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
 
         [DllImport("user32.dll", EntryPoint = "GetClassLong")]
         public static extern uint GetClassLongPtr32(IntPtr hWnd, int nIndex);
 
         [DllImport("user32.dll", EntryPoint = "GetClassLongPtr")]
         public static extern IntPtr GetClassLongPtr64(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        public static extern bool GetWindowRect(IntPtr hwnd, out Rect rectangle);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetWindowPlacement(IntPtr hWnd, ref Windowplacement lpwndpl);
-        //  Hide = 0,
-        //  Normal = 1,
-        //  Minimized = 2,
-        //  Maximized = 3,
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
 
         [DllImport("User32")]
         private static extern int ShowWindow(IntPtr hwnd, int nCmdShow);
@@ -59,7 +53,97 @@ namespace Task_Layout_Manager
         // 3	Maximized	2
         // 4	Restore	    9
 
-        #endregion "DLL-Import"
+        public struct Windowplacement
+        {
+            public int Flags;
+            public int length;
+            public int ShowCmd;
+            public Point ptMaxPosition;
+            public Point ptMinPosition;
+            public Rectangle rcNormalPosition;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Rect
+        {
+            public int Left;        // x position of upper-left corner
+            public int Top;         // y position of upper-left corner
+            public int Right;       // x position of lower-right corner
+            public int Bottom;      // y position of lower-right corner
+        }
+
+        public static List<TaskWindow> GetProcesses(bool getAll = false)
+        {
+            ignoredProcesses = Properties.Settings.Default.ignoredProcesses.Split(',');
+            TaskWindows.Clear();
+
+            Process[] procs = Process.GetProcesses();
+            foreach (Process proc in procs)
+            {
+                IntPtr hWnd;
+                Windowplacement placement = new Windowplacement();
+
+                if (getAll)
+                {
+                    if ((hWnd = proc.MainWindowHandle) != IntPtr.Zero)
+                    {
+                        GetWindowPlacement(proc.MainWindowHandle, ref placement);
+                        GetWindowRect(hWnd, out var rct);
+
+                        //ShowCmd = Windowstate
+                        // 1 = Normal, 2 = Minimized, 3 = Maximized
+                        int width = rct.Right - rct.Left + 1;
+                        int height = rct.Bottom - rct.Top + 1;
+
+                        if (width > 1 && height > 1)
+                        {
+                            TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
+                                placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
+                            // X Y H W
+                            //debugging
+                            var s = Screen.FromHandle(hWnd).DeviceName;
+                            Console.WriteLine("---------------------------------------");
+                            Console.WriteLine("{0}  | {1}", proc.ProcessName, hWnd);
+                            Console.WriteLine("{0}", placement.ShowCmd.ToString());
+                            Console.WriteLine("---------------------------------------");
+                        }
+
+                    }
+                }
+                else
+                {
+                    //Ignore Processes that are listed in ignoredProcesses
+                    if (Array.IndexOf(ignoredProcesses, proc.ProcessName) == -1)
+                    {
+                        if ((hWnd = proc.MainWindowHandle) != IntPtr.Zero)
+                        {
+                            GetWindowPlacement(proc.MainWindowHandle, ref placement);
+                            GetWindowRect(hWnd, out var rct);
+
+                            //ShowCmd = Windowstate
+                            // 1 = Normal, 2 = Minimized, 3 = Maximized
+                            int width = rct.Right - rct.Left + 1;
+                            int height = rct.Bottom - rct.Top + 1;
+
+                            if (width > 1 && height > 1)
+                            {
+                                TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
+                                    placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
+                                // X Y H W
+                                //debugging
+                                var s = Screen.FromHandle(hWnd).DeviceName;
+                                Console.WriteLine("---------------------------------------");
+                                Console.WriteLine("{0}  | {1}", proc.ProcessName, hWnd);
+                                Console.WriteLine("{0}", placement.ShowCmd.ToString());
+                                Console.WriteLine("---------------------------------------");
+
+                            }
+                        }
+                    }
+                }
+            }
+            return TaskWindows;
+        }
 
         public static ImageSource GetAppIcon(IntPtr hwnd)
         {
@@ -91,85 +175,12 @@ namespace Task_Layout_Manager
                 return new IntPtr(GetClassLongPtr32(hWnd, nIndex));
         }
 
-        public static List<TaskWindow> GetProcesses(bool getAll = false)
+        private static Windowplacement GetPlacement(IntPtr hwnd)
         {
-            ignoredProcesses = Properties.Settings.Default.ignoredProcesses.Split(',');
-            TaskWindows.Clear();
-
-            Process[] procs = Process.GetProcesses();
-            foreach (Process proc in procs)
-            {
-                IntPtr hWnd;
-                Windowplacement placement = new Windowplacement();
-                try
-                {
-
-                    if (getAll)
-                    {
-                        if ((hWnd = proc.MainWindowHandle) != IntPtr.Zero)
-                        {
-                            GetWindowPlacement(proc.MainWindowHandle, ref placement);
-                            GetWindowRect(hWnd, out var rct);
-
-                            //ShowCmd = Windowstate
-                            // 1 = Normal, 2 = Minimized, 3 = Maximized
-                            int width = rct.Right - rct.Left + 1;
-                            int height = rct.Bottom - rct.Top + 1;
-
-                            if (width > 1 && height > 1)
-                            {
-                                TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
-                                    placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
-                                // X Y H W
-                                //debugging
-                                var s = Screen.FromHandle(hWnd).DeviceName;
-                                Console.WriteLine("{0} | {1}", proc.ProcessName, hWnd);
-                                Console.WriteLine("X: {0} | Y: {1} | Screen: {2}", rct.Left, rct.Top, s);
-                                Console.WriteLine("Height: {0} | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
-                            }
-
-                        }
-                    }
-                    else
-                    {
-                        //Ignore Processes that are listed in ignoredProcesses
-                        if (Array.IndexOf(ignoredProcesses, proc.ProcessName) == -1)
-                        {
-                            if ((hWnd = proc.MainWindowHandle) != IntPtr.Zero)
-                            {
-                                GetWindowPlacement(proc.MainWindowHandle, ref placement);
-                                GetWindowRect(hWnd, out var rct);
-
-                                //ShowCmd = Windowstate
-                                // 1 = Normal, 2 = Minimized, 3 = Maximized
-                                int width = rct.Right - rct.Left + 1;
-                                int height = rct.Bottom - rct.Top + 1;
-
-                                if (width > 1 && height > 1)
-                                {
-                                    TaskWindows.Add(new TaskWindow(false, proc.ProcessName, proc.MainModule.FileName,
-                                        placement.Flags, placement.ShowCmd, rct.Left, rct.Top, height, width, GetAppIcon(hWnd)));
-                                    // X Y H W
-                                    //debugging
-                                    var s = Screen.FromHandle(hWnd).DeviceName;
-                                    Console.WriteLine("---------------------------------------");
-                                    Console.WriteLine("{0}  | {1}", proc.ProcessName, hWnd);
-                                    Console.WriteLine("X: {0}       | Y: {1}    | Screen: {2}", rct.Left, rct.Top, s);
-                                    Console.WriteLine("{0}", placement.ShowCmd.ToString());
-                                    Console.WriteLine("Height: {0}  | Width: {1}", rct.Bottom - rct.Top + 1, rct.Right - rct.Left + 1);
-                                    Console.WriteLine("---------------------------------------");
-
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            }
-            return TaskWindows;
+            Windowplacement placement = new Windowplacement();
+            placement.length = Marshal.SizeOf(placement);
+            GetWindowPlacement(hwnd, ref placement);
+            return placement;
         }
 
         public static void MovePorcessWindow(List<TaskWindow> tws)
@@ -241,31 +252,6 @@ namespace Task_Layout_Manager
             UpdateStatus("Done");
         }
 
-        public static void UpdateStatus(string text)
-        {
-            if (!System.Windows.Application.Current.Dispatcher.CheckAccess())
-            {
-                System.Windows.Application.Current.Dispatcher.Invoke(new Action<string>(UpdateStatus), new object[] { text });
-                return;
-            }
-
-            foreach (Window window in System.Windows.Application.Current.Windows)
-            {
-                if (window.GetType() == typeof(MainWindow))
-                {
-                    (window as MainWindow).Lbl_StatusBar.Content = text;
-                }
-            }
-        }
-
-        private static Windowplacement GetPlacement(IntPtr hwnd)
-        {
-            Windowplacement placement = new Windowplacement();
-            placement.length = Marshal.SizeOf(placement);
-            GetWindowPlacement(hwnd, ref placement);
-            return placement;
-        }
-
         private static void StartProcs(List<TaskWindow> tws)
         {
             foreach (TaskWindow tw in tws)
@@ -312,23 +298,21 @@ namespace Task_Layout_Manager
             Thread.Sleep(5000);
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Rect
+        public static void UpdateStatus(string text)
         {
-            public int Left;        // x position of upper-left corner
-            public int Top;         // y position of upper-left corner
-            public int Right;       // x position of lower-right corner
-            public int Bottom;      // y position of lower-right corner
-        }
+            if (!System.Windows.Application.Current.Dispatcher.CheckAccess())
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(new Action<string>(UpdateStatus), new object[] { text });
+                return;
+            }
 
-        public struct Windowplacement
-        {
-            public int Flags;
-            public int length;
-            public Point ptMaxPosition;
-            public Point ptMinPosition;
-            public Rectangle rcNormalPosition;
-            public int ShowCmd;
+            foreach (Window window in System.Windows.Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(MainWindow))
+                {
+                    (window as MainWindow).Lbl_StatusBar.Content = text;
+                }
+            }
         }
     }
 }
