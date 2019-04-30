@@ -79,12 +79,15 @@ namespace Task_Layout_Manager
         private void SaveIgnoredProcs()
         {
             string s = "";
-            foreach (var temp in ListView_IgnoredProcs.Items)
+            if (ListView_IgnoredProcs.Items.Count > 0)
             {
-                if(temp != "")
-                    s += temp + ",";
+                foreach (var temp in ListView_IgnoredProcs.Items)
+                {
+                    if ((string)temp != "")
+                        s += temp + ",";
+                }
+                s = s.Remove(s.Length - 1);
             }
-            s = s.Remove(s.Length - 1);
             Properties.Settings.Default.ignoredProcesses = s;
             Properties.Settings.Default.Save();
         }

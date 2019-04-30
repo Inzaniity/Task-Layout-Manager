@@ -260,7 +260,7 @@ namespace Task_Layout_Manager
 
                 if (processes.Length == 0)
                 {
-                    UpdateStatus("Strating: " + tw.Name);
+                    UpdateStatus("Starting: " + tw.Name);
                     Process.Start(tw.Path);
                 }
             }
