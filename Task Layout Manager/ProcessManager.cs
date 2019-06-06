@@ -212,7 +212,7 @@ namespace Task_Layout_Manager
                                     // Windowstate = Normal
                                     case 1:
                                         Console.WriteLine(GetPlacement(hWnd).ShowCmd);
-                                        int state = GetPlacement(hWnd).ShowCmd;
+                                        ShowWindow(hWnd, tw.ShowCmd);
                                         var tries2 = 0;
                                         GetWindowRect(hWnd, out Rect rct);
                                         var width = rct.Right - rct.Left + 1;
@@ -236,12 +236,12 @@ namespace Task_Layout_Manager
 
                                     // Windowstate = Maximized
                                     case 2:
-                                        ShowWindow(hWnd, 1);
+                                        ShowWindow(hWnd, tw.ShowCmd);
                                         break;
 
                                     // Windowstate = Minimized
                                     case 3:
-                                        ShowWindow(hWnd, 2);
+                                        ShowWindow(hWnd, tw.ShowCmd);
                                         break;
                                 }
                             }
@@ -295,6 +295,7 @@ namespace Task_Layout_Manager
                     }
                 }
             }
+            UpdateStatus("Applying Layout");
             Thread.Sleep(5000);
         }
 

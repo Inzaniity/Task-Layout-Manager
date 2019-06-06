@@ -12,7 +12,7 @@ namespace Task_Layout_Manager
 {
     public partial class MainWindow : MetroWindow
     {
-        private readonly String[] args;
+        private readonly string[] args;
         private List<TaskWindow> _tskwin;
         public MainWindow()
         {
